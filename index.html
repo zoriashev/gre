@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expenses · Advertisement Costs</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>Expenses</header>
+
+<div class="wrap">
+  <div class="topbar">
+    <div class="tabs" id="tabs">
+      <button class="tab" data-view="comm">Buying → Card Commissions</button>
+      <button class="tab active" data-view="ad">Advertisement Costs</button>
+      <button class="tab" data-view="pl">Profit & Loss</button>
+      <button class="tab" data-view="pld">Profit & Loss Daily</button>
+    </div>
+    <button class="add-btn" id="adAddBtn">+ NEW ADD</button>
+  </div>
+
+  <!-- Advertisement Costs (table + search) -->
+  <section id="view-ad" class="card">
+    <div class="cc-searchbar">
+      <div class="note">Всі внесені витрати на рекламу.</div>
+      <input id="adSearch" class="cc-input cc-search" placeholder="Search campaign / buyer / GEO…">
+    </div>
+
+    <div class="table-wrap">
+      <table id="adTable">
+        <thead>
+          <tr>
+            <th style="width:110px">Date</th>
+            <th style="width:90px">GEO</th>
+            <th>Campaign</th>
+            <th>Buyer</th>
+            <th style="width:120px">Adv. Cost</th>
+            <th style="width:80px">%</th>
+            <th style="width:150px">Cost + %</th>
+            <th style="width:80px">Leads</th>
+            <th style="width:110px">Deal</th>
+            <th>Funnel</th>
+            <th style="width:120px">Status</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Card Commissions (щоб зберегти попередню вкладку) -->
+  <section id="view-comm" class="card" style="display:none">
+    <h2>Card Commissions</h2>
+    <p class="note">Справочник комиссий. Використовується в Advertisement Costs.</p>
+    <div class="cc-searchbar">
+      <div class="note" id="sortInfo"></div>
+      <input id="cSearch" class="cc-input cc-search" placeholder="Search commission name…">
+    </div>
+    <div class="table-wrap">
+      <table id="cTable">
+        <thead>
+          <tr>
+            <th style="width:45%"><span class="sort-btn" data-sort="name" id="thName">Name
+              <svg class="sort-arrow" width="12" height="12" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" fill="currentColor"/></svg>
+            </span></th>
+            <th style="width:20%"><span class="sort-btn" data-sort="percent" id="thPercent">Percent, %
+              <svg class="sort-arrow" width="12" height="12" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5z" fill="currentColor"/></svg>
+            </span></th>
+            <th>Comment</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="row-gap">
+      <button class="cc-btn primary" id="addNewTop">Add Commission</button>
+    </div>
+  </section>
+
+  <!-- Profit & Loss -->
+  <section id="view-pl" class="card" style="display:none">
+    <h2>Profit & Loss</h2>
+    <div class="filters-pl">
+      <div class="filters-left">
+        <label>From</label><input type="date" id="plFrom" class="cc-input short">
+        <label>To</label><input type="date" id="plTo" class="cc-input short">
+        <input id="plCamp" class="cc-input mid" placeholder="Campaign">
+        <input id="plBuyer" class="cc-input mid" placeholder="Buyer">
+      </div>
+      <div class="filters-right">
+        <span class="note">Columns:</span>
+        <label><input type="checkbox" class="pl-col" data-col="date" checked> Date</label>
+        <label><input type="checkbox" class="pl-col" data-col="geo" checked> GEO</label>
+        <label><input type="checkbox" class="pl-col" data-col="campaign" checked> Campaign</label>
+        <label><input type="checkbox" class="pl-col" data-col="buyer" checked> Buyer</label>
+        <label><input type="checkbox" class="pl-col" data-col="leads" checked> Leads</label>
+        <label><input type="checkbox" class="pl-col" data-col="deal" checked> Deal</label>
+        <label><input type="checkbox" class="pl-col" data-col="status" checked> Status</label>
+        <label><input type="checkbox" class="pl-col" data-col="cost" checked> Adv. Cost</label>
+        <label><input type="checkbox" class="pl-col" data-col="pct" checked> %</label>
+        <label><input type="checkbox" class="pl-col" data-col="with" checked> Cost + %</label>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <table id="plTable">
+        <thead><tr></tr></thead>
+        <tbody></tbody>
+        <tfoot>
+          <tr>
+            <td colspan="6"></td>
+            <td class="total-label">Totals:</td>
+            <td id="sumCost" class="total-val"></td>
+            <td></td>
+            <td id="sumWith" class="total-val"></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+
+<!-- Floating filter button -->
+<button class="fab" id="plFilterBtn">
+  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+    <path d="M3 6h18M6 12h12m-9 6h6"/>
+  </svg>
+</button>
+
+<!-- Filter drawer -->
+<div id="plFilterDrawer" class="drawer">
+  <div class="drawer-content">
+    <h3>Columns filter</h3>
+    <label><input type="checkbox" data-col="date" checked> Date</label><br>
+    <label><input type="checkbox" data-col="geo" checked> GEO</label><br>
+    <label><input type="checkbox" data-col="campaign" checked> Campaign</label><br>
+    <label><input type="checkbox" data-col="buyer" checked> Buyer</label><br>
+    <label><input type="checkbox" data-col="leads" checked> Leads</label><br>
+    <label><input type="checkbox" data-col="deal" checked> Deal</label><br>
+    <label><input type="checkbox" data-col="status" checked> Status</label><br>
+    <label><input type="checkbox" data-col="cost" checked> Advertising Cost</label><br>
+    <label><input type="checkbox" data-col="pct" checked> Commission %</label><br>
+    <label><input type="checkbox" data-col="with" checked> Cost w/ Commission</label><br>
+    <button id="plFilterClose">Close</button>
+  </div>
+</div>
+
+  </section>
+
+  <!-- Profit & Loss Daily -->
+  <section id="view-pld" class="card" style="display:none">
+    <h2>Profit & Loss Daily</h2>
+    <div class="filters-daily">
+      <label>From</label><input type="date" id="pldFrom" class="cc-input short">
+      <label>To</label><input type="date" id="pldTo" class="cc-input short">
+      <button class="cc-btn" id="pldClear">Clear</button>
+    </div>
+    <div class="table-wrap">
+      <table id="pldTable">
+        <thead><tr><th>Date</th><th>Leads (sum)</th><th>Deal (sum)</th><th>Cost+% (sum)</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+
+<!-- Drawer: Add/Edit Commission -->
+<div id="ccOverlay" class="cc-drawer-overlay"></div>
+<aside id="ccDrawer" class="cc-drawer" aria-hidden="true">
+  <div class="cc-dr-head">
+    <div class="cc-dr-title">Add Commission</div>
+    <button class="cc-dr-close" id="ccCloseBtn">✕</button>
+  </div>
+  <div class="cc-dr-body">
+    <div class="cc-grid-2">
+      <div class="cc-field">
+        <label for="ccName">Commission name *</label>
+        <input id="ccName" class="cc-input" placeholder="Напр. RuCards 2%">
+        <div id="ccNameErr" class="cc-err">Enter the name</div>
+      </div>
+      <div class="cc-field">
+        <label for="ccPercent">Commission (%) *</label>
+        <input id="ccPercent" class="cc-input" type="number" step="0.01" placeholder="2.00">
+        <div id="ccPctErr" class="cc-err">Percent must be 0–100</div>
+      </div>
+    </div>
+    <div class="cc-field" style="margin-top:12px">
+      <label for="ccComment">Comment</label>
+      <textarea id="ccComment" class="cc-text" placeholder="Optional note"></textarea>
+    </div>
+    <div class="cc-actions">
+      <button id="ccSave" class="cc-btn primary" type="button">Save</button>
+      <button id="ccCancel" class="cc-btn ghost" type="button">Cancel</button>
+    </div>
+  </div>
+</aside>
+
+<!-- Drawer: Add Advertisement -->
+<div id="adOverlay" class="cc-drawer-overlay"></div>
+<aside id="adDrawer" class="cc-drawer" aria-hidden="true">
+  <div class="cc-dr-head">
+    <div class="cc-dr-title">Add Advertisement Cost</div>
+    <button class="cc-dr-close" id="adCloseBtn">✕</button>
+  </div>
+  <div class="cc-dr-body">
+    <div class="grid-2">
+      <div class="cc-field"><label>Date</label><input id="adDate" type="date" class="cc-input"></div>
+      <div class="cc-field"><label>GEO</label>
+        <select id="adGeo" class="cc-input">
+          <option value="US">🇺🇸 US</option><option value="CA">🇨🇦 CA</option>
+          <option value="DE">🇩🇪 DE</option><option value="UK">🇬🇧 UK</option>
+        </select>
+      </div>
+      <div class="cc-field"><label>Campaign</label><input id="adCampaign" class="cc-input" placeholder="Campaign name"></div>
+      <div class="cc-field"><label>Buyer</label><input id="adBuyer" class="cc-input" placeholder="Buyer"></div>
+      <div class="cc-field"><label>Advertising Cost</label><input id="adCost" type="number" step="0.01" class="cc-input" placeholder="100.00"></div>
+      <div class="cc-field"><label>Card commission</label><select id="adCommission" class="cc-input"></select></div>
+      <div class="cc-field"><label>Commission %</label><input id="adPct" class="cc-input" type="number" step="0.01" readonly></div>
+      <div class="cc-field"><label>Advertising Cost with commission</label><input id="adCostWith" class="cc-input" type="number" step="0.01" readonly></div>
+      <div class="cc-field"><label>Leads (optional)</label><input id="adLeads" class="cc-input" type="number" step="1"></div>
+      <div class="cc-field"><label>Deal (revenue)</label><input id="adDeal" class="cc-input" type="number" step="0.01"></div>
+      <div class="cc-field"><label>Funnel</label><input id="adFunnel" class="cc-input" placeholder="Funnel"></div>
+      <div class="cc-field"><label>Status</label>
+        <select id="adStatus" class="cc-input">
+          <option value="approved">Approved</option>
+          <option value="disapproved">Disapproved</option>
+        </select>
+      </div>
+    </div>
+    <div class="cc-actions">
+      <button class="cc-btn primary" id="adSave">Save</button>
+      <button class="cc-btn ghost" id="adCancel">Cancel</button>
+    </div>
+  </div>
+</aside>
+
+<script src="app.js"></script>
+</body>
+</html>
