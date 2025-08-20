@@ -1,11 +1,17 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
+
+
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Expenses · Advertisement Costs</title>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
   <link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/uk.js"></script>  
+  
 </head>
 <body>
 <header>Expenses</header>
@@ -80,72 +86,104 @@
     </div>
   </section>
 
-  <!-- Profit & Loss -->
-  <section id="view-pl" class="card" style="display:none">
-    <h2>Profit & Loss</h2>
-    <div class="filters-pl">
-      <div class="filters-left">
-        <label>From</label><input type="date" id="plFrom" class="cc-input short">
-        <label>To</label><input type="date" id="plTo" class="cc-input short">
-        <input id="plCamp" class="cc-input mid" placeholder="Campaign">
-        <input id="plBuyer" class="cc-input mid" placeholder="Buyer">
-      </div>
-      <div class="filters-right">
-        <span class="note">Columns:</span>
-        <label><input type="checkbox" class="pl-col" data-col="date" checked> Date</label>
-        <label><input type="checkbox" class="pl-col" data-col="geo" checked> GEO</label>
-        <label><input type="checkbox" class="pl-col" data-col="campaign" checked> Campaign</label>
-        <label><input type="checkbox" class="pl-col" data-col="buyer" checked> Buyer</label>
-        <label><input type="checkbox" class="pl-col" data-col="leads" checked> Leads</label>
-        <label><input type="checkbox" class="pl-col" data-col="deal" checked> Deal</label>
-        <label><input type="checkbox" class="pl-col" data-col="status" checked> Status</label>
-        <label><input type="checkbox" class="pl-col" data-col="cost" checked> Adv. Cost</label>
-        <label><input type="checkbox" class="pl-col" data-col="pct" checked> %</label>
-        <label><input type="checkbox" class="pl-col" data-col="with" checked> Cost + %</label>
-      </div>
-    </div>
-    <div class="table-wrap">
-      <table id="plTable">
-        <thead><tr></tr></thead>
-        <tbody></tbody>
-        <tfoot>
-          <tr>
-            <td colspan="6"></td>
-            <td class="total-label">Totals:</td>
-            <td id="sumCost" class="total-val"></td>
-            <td></td>
-            <td id="sumWith" class="total-val"></td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
+<!-- Profit & Loss -->
+<section id="view-pl" class="card" style="display:none">
+  <h2>Profit &amp; Loss</h2>
 
-<!-- Floating filter button -->
-<button class="fab" id="plFilterBtn">
-  <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-    <path d="M3 6h18M6 12h12m-9 6h6"/>
-  </svg>
-</button>
+  <!-- Фільтри P&L зверху (залиш свої поля або цей приклад) -->
+  <div class=" pFrow" >
+    
+<!-- одне поле: ДД.ММ.РРРР – ДД.ММ.РРРР -->
+<input id="plRangePicker" class="cc-input" placeholder="ДД.ММ.РРРР – ДД.ММ.РРРР" />
 
-<!-- Filter drawer -->
-<div id="plFilterDrawer" class="drawer">
-  <div class="drawer-content">
-    <h3>Columns filter</h3>
-    <label><input type="checkbox" data-col="date" checked> Date</label><br>
-    <label><input type="checkbox" data-col="geo" checked> GEO</label><br>
-    <label><input type="checkbox" data-col="campaign" checked> Campaign</label><br>
-    <label><input type="checkbox" data-col="buyer" checked> Buyer</label><br>
-    <label><input type="checkbox" data-col="leads" checked> Leads</label><br>
-    <label><input type="checkbox" data-col="deal" checked> Deal</label><br>
-    <label><input type="checkbox" data-col="status" checked> Status</label><br>
-    <label><input type="checkbox" data-col="cost" checked> Advertising Cost</label><br>
-    <label><input type="checkbox" data-col="pct" checked> Commission %</label><br>
-    <label><input type="checkbox" data-col="with" checked> Cost w/ Commission</label><br>
-    <button id="plFilterClose">Close</button>
-  </div>
+<!-- приховані поля, куди кладемо Y-m-d для запитів/фільтрів -->
+<input type="hidden" id="plFrom">
+<input type="hidden" id="plTo">
+
+ <input id="plCamp" class="cc-input medw" placeholder="Campaign">
+    <input id="plBuyer" class="cc-input medw" placeholder="Buyer">
+
 </div>
 
-  </section>
+
+       
+ 
+
+  <!-- Таблиця P&L. ВАЖЛИВО: клас на кожному th/td відповідає ключу стовпця -->
+  <div class="table-wrap">
+    <table id="plTable">
+      <thead>
+        <tr id="plHead">
+          <th class="date">Date</th>
+          <th class="geo">GEO</th>
+          <th class="campaign">Campaign</th>
+          <th class="buyer">Buyer</th>
+          <th class="leads">Leads</th>
+          <th class="deal">Deal</th>
+          <th class="status">Status</th>
+          <th class="cost">Advertising Cost</th>
+          <th class="pct">Commission %</th>
+          <th class="with">Cost w/ Commission</th>
+        </tr>
+      </thead>
+      <tbody id="plBody">
+        <!-- рендериться скриптом -->
+      </tbody>
+      <tfoot>
+        <tr>
+          <td colspan="6"></td>
+          <td class="total-label">Totals:</td>
+          <td id="sumCost" class="total-val"></td>
+          <td></td>
+          <td id="sumWith" class="total-val"></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Плаваюча кнопка фільтра -->
+  <button id="plFilterBtn" class="fab-square" aria-label="Columns filter" title="Columns filter">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none">
+      <rect x="6" y="7" width="12" height="2" rx="1" fill="white"></rect>
+      <rect x="8" y="11" width="8" height="2" rx="1" fill="white"></rect>
+      <rect x="10" y="15" width="4" height="2" rx="1" fill="white"></rect>
+    </svg>
+  </button>
+
+  <!-- Затемнення -->
+  <div id="plMask" class="pl-mask"></div>
+
+  <!-- Правий drawer -->
+  <aside id="plFilterDrawer" class="pl-drawer" aria-hidden="true">
+    <div class="pl-head">
+      <div class="pl-title">Columns filter</div>
+      <button id="plFilterReset" class="pl-reset">RESET</button>
+    </div>
+
+    <div class="pl-body">
+      <p class="pl-note">Познач, які колонки показувати:</p>
+      <ul class="pl-list">
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="date" checked> Date</label></li>
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="geo" checked> GEO</label></li>
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="campaign" checked> Campaign</label></li>
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="buyer" checked> Buyer</label></li>
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="leads" checked> Leads</label></li>
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="deal" checked> Deal</label></li>
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="status" checked> Status</label></li>
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="cost" checked> Advertising Cost</label></li>
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="pct" checked> Commission %</label></li>
+        <li class="pl-item"><label><input type="checkbox" class="pl-col" data-col="with" checked> Cost w/ Commission</label></li>
+      </ul>
+    </div>
+
+    <div class="pl-foot">
+      <button id="plFilterClose" class="btn ghost">CANCEL</button>
+      <button id="plFilterApply" class="btn primary">APPLY</button>
+    </div>
+  </aside>
+</section>
+
+
 
   <!-- Profit & Loss Daily -->
   <section id="view-pld" class="card" style="display:none">

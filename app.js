@@ -310,6 +310,41 @@ function renderPLDaily(){
 }
 
 
+// Profit & Loss — колоночний фільтр (кнопка + drawer)
+document.addEventListener('DOMContentLoaded', () => {
+  const view = document.getElementById('view-pl');
+  if (!view) return;
+
+  const btn    = document.getElementById('plFilterBtn');
+  const drawer = document.getElementById('plFilterDrawer');
+  const close  = document.getElementById('plFilterClose');
+
+  if (btn && drawer && close) {
+    btn.addEventListener('click', () => drawer.classList.add('open'));
+    close.addEventListener('click', () => drawer.classList.remove('open'));
+  }
+
+  // застосування видимості колонок
+  function applyVisibility() {
+    document.querySelectorAll('#plFilterDrawer .pl-col').forEach(cb => {
+      const col = cb.dataset.col;
+      const show = cb.checked;
+      view.querySelectorAll(`th.${col}, td.${col}`).forEach(cell => {
+        cell.style.display = show ? '' : 'none';
+      });
+    });
+  }
+
+  // реагувати одразу при кліку
+  document.querySelectorAll('#plFilterDrawer .pl-col')
+    .forEach(cb => cb.addEventListener('change', () => {
+      applyVisibility();
+      try { if (typeof renderPL === 'function') renderPL(); } catch(e){}
+    }));
+
+  // перша синхронізація (на випадок, якщо таблиця вже намальована)
+  applyVisibility();
+});
 // Profit & Loss filter drawer
 document.addEventListener("DOMContentLoaded", () => {
   const btn = document.getElementById('plFilterBtn');
@@ -337,3 +372,86 @@ function init(){
   renderAds(); renderPL(); renderPLDaily(); renderCommissions(); fillCommissionSelect();
 }
 init();
+
+
+document.addEventListener('DOMContentLoaded', () => {
+  const view   = document.getElementById('view-pl');
+  if (!view) return;
+
+  const btn    = document.getElementById('plFilterBtn');
+  const mask   = document.getElementById('plMask');
+  const drawer = document.getElementById('plFilterDrawer');
+  const reset  = document.getElementById('plFilterReset');
+  const close  = document.getElementById('plFilterClose');
+  const apply  = document.getElementById('plFilterApply');
+
+  const open  = ()=>{ drawer.classList.add('open'); mask.classList.add('open'); };
+  const hide  = ()=>{ drawer.classList.remove('open'); mask.classList.remove('open'); };
+
+  btn?.addEventListener('click', open);
+  mask?.addEventListener('click', hide);
+  close?.addEventListener('click', hide);
+  apply?.addEventListener('click', hide);
+
+  function applyVisibility(){
+    document.querySelectorAll('#plFilterDrawer .pl-col').forEach(cb=>{
+      const k = cb.dataset.col;
+      const show = cb.checked;
+      view.querySelectorAll(`th.${k}, td.${k}`).forEach(el=>{
+        el.style.display = show ? '' : 'none';
+      });
+    });
+  }
+
+  // оновлюємо при зміні чекбоксів
+  document.querySelectorAll('#plFilterDrawer .pl-col')
+    .forEach(cb => cb.addEventListener('change', () => {
+      applyVisibility();
+      try { if (typeof renderPL === 'function') renderPL(); } catch(e){}
+    }));
+
+  // RESET — увімкнути всі
+  reset?.addEventListener('click', ()=>{
+    document.querySelectorAll('#plFilterDrawer .pl-col').forEach(cb=>cb.checked=true);
+    applyVisibility();
+    try { if (typeof renderPL === 'function') renderPL(); } catch(e){}
+  });
+
+  // стартова синхронізація (якщо таблиця вже намальована)
+  applyVisibility();
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  const rangeInput = document.getElementById('plRangePicker');
+  const fromHidden = document.getElementById('plFrom');
+  const toHidden   = document.getElementById('plTo');
+
+  if (!rangeInput) return;
+
+  const fp = flatpickr(rangeInput, {
+    mode: 'range',
+    locale: flatpickr.l10ns.uk,     // українська
+    dateFormat: 'd.m.Y',            // що бачить користувач
+    altInput: false,
+    allowInput: true,
+    clickOpens: true,
+    defaultDate: [],                // можна підставити поточний діапазон
+    onReady: function(_, __, instance) {
+      // понеділок — перший день тижня
+      instance.set('locale', { ...flatpickr.l10ns.uk, firstDayOfWeek: 1 });
+    },
+    onChange: function(selectedDates, _str, instance) {
+      // selectedDates[0] = від, selectedDates[1] = до (може бути undefined поки не вибрано другу дату)
+      const [from, to] = selectedDates;
+      const fmt = d => d ? instance.formatDate(d, 'Y-m-d') : '';
+
+      // якщо вибрано лише одну дату — вважаємо обидві однаковими
+      fromHidden.value = fmt(from);
+      toHidden.value   = fmt(to || from);
+    }
+  });
+
+  // Якщо хочеш програмно задати діапазон (наприклад "сьогодні"):
+  // const today = new Date();
+  // fp.setDate([today, today], true); // другий аргумент true — викликає onChange
+});
